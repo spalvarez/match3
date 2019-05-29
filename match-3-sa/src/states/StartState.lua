@@ -69,6 +69,53 @@ function StartState:update(dt)
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
     end
+    
+    if not self.pauseInput then
+        local y=12
+        --Handle mouse usage
+        local mouseX, mouseY = push:toGame(love.mouse.getPosition())
+        if mouseX >= VIRTUAL_WIDTH/2 - 25 and
+           mouseX <= VIRTUAL_WIDTH/2 + 25 then
+            if mouseY >= VIRTUAL_HEIGHT / 2 + y + 2 and 
+               mouseY <= VIRTUAL_HEIGHT / 2 + y + 22 then
+                if self.currentMenuItem == 2 then
+                    self.currentMenuItem = 1
+                    gSounds['select']:play()
+                end
+
+                if love.mouse.wasPressed(1) then
+                    -- tween, using Timer, the transition rect's alpha to 255, then
+                    -- transition to the BeginGame state after the animation is over
+                    Timer.tween(1, {
+                        [self] = {transitionAlpha = 255}
+                    }):finish(function()
+                        gStateMachine:change('begin-game', {
+                            level = 1
+                        })
+
+                    -- remove color timer from Timer
+                    self.colorTimer:remove()
+                    end)
+                    -- turn off input during transition
+                    self.pauseInput = true
+                end
+            elseif mouseY >= VIRTUAL_HEIGHT / 2 + y + 32 and 
+                mouseY <= VIRTUAL_HEIGHT / 2 + y + 52 then
+                if self.currentMenuItem == 1 then
+                    self.currentMenuItem = 2
+                    gSounds['select']:play()
+                end
+
+                if love.mouse.wasPressed(1) then
+                    love.event.quit()
+                    -- turn off input during transition
+                    self.pauseInput = true
+                end
+            end
+        end
+        -- update our Timer, which will be used for our fade transitions
+        Timer.update(dt)
+    end
 
     -- as long as can still input, i.e., we're not in a transition...
     if not self.pauseInput then
@@ -106,59 +153,59 @@ function StartState:update(dt)
 
     -- update our Timer, which will be used for our fade transitions
     Timer.update(dt)
-end
+    end
 
-function StartState:render()
-    
-    -- render all tiles and their drop shadows
-    for y = 1, 8 do
-        for x = 1, 8 do
+        function StartState:render()
             
-            -- render shadow first
-            love.graphics.setColor(0, 0, 0, 255)
-            love.graphics.draw(gTextures['main'], positions[(y - 1) * x + x], 
-                (x - 1) * 32 + 128 + 3, (y - 1) * 32 + 16 + 3)
+            -- render all tiles and their drop shadows
+            for y = 1, 8 do
+                for x = 1, 8 do
+                    
+                    -- render shadow first
+                    love.graphics.setColor(0, 0, 0, 255)
+                    love.graphics.draw(gTextures['main'], positions[(y - 1) * x + x], 
+                        (x - 1) * 32 + 128 + 3, (y - 1) * 32 + 16 + 3)
 
-            -- render tile
-            love.graphics.setColor(255, 255, 255, 255)
-            love.graphics.draw(gTextures['main'], positions[(y - 1) * x + x], 
-                (x - 1) * 32 + 128, (y - 1) * 32 + 16)
+                    -- render tile
+                    love.graphics.setColor(255, 255, 255, 255)
+                    love.graphics.draw(gTextures['main'], positions[(y - 1) * x + x], 
+                        (x - 1) * 32 + 128, (y - 1) * 32 + 16)
+                end
+            end
+
+            -- keep the background and tiles a little darker than normal
+            love.graphics.setColor(0, 0, 0, 128)
+            love.graphics.rectangle('fill', 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+
+            self:drawMatch3Text(-60)
+            self:drawOptions(12)
+
+            -- draw our transition rect; is normally fully transparent, unless we're moving to a new state
+            love.graphics.setColor(255, 255, 255, self.transitionAlpha)
+            love.graphics.rectangle('fill', 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
         end
-    end
 
-    -- keep the background and tiles a little darker than normal
-    love.graphics.setColor(0, 0, 0, 128)
-    love.graphics.rectangle('fill', 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+        --[[
+            Draw the centered MATCH-3 text with background rect, placed along the Y
+            axis as needed, relative to the center.
+        ]]
+        function StartState:drawMatch3Text(y)
+            
+            -- draw semi-transparent rect behind MATCH 3
+            love.graphics.setColor(255, 255, 255, 128)
+            love.graphics.rectangle('fill', VIRTUAL_WIDTH / 2 - 76, VIRTUAL_HEIGHT / 2 + y - 11, 150, 58, 6)
 
-    self:drawMatch3Text(-60)
-    self:drawOptions(12)
+            -- draw MATCH 3 text shadows
+            love.graphics.setFont(gFonts['large'])
+            self:drawTextShadow('MATCH 3', VIRTUAL_HEIGHT / 2 + y)
 
-    -- draw our transition rect; is normally fully transparent, unless we're moving to a new state
-    love.graphics.setColor(255, 255, 255, self.transitionAlpha)
-    love.graphics.rectangle('fill', 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
-end
-
---[[
-    Draw the centered MATCH-3 text with background rect, placed along the Y
-    axis as needed, relative to the center.
-]]
-function StartState:drawMatch3Text(y)
-    
-    -- draw semi-transparent rect behind MATCH 3
-    love.graphics.setColor(255, 255, 255, 128)
-    love.graphics.rectangle('fill', VIRTUAL_WIDTH / 2 - 76, VIRTUAL_HEIGHT / 2 + y - 11, 150, 58, 6)
-
-    -- draw MATCH 3 text shadows
-    love.graphics.setFont(gFonts['large'])
-    self:drawTextShadow('MATCH 3', VIRTUAL_HEIGHT / 2 + y)
-
-    -- print MATCH 3 letters in their corresponding current colors
-    for i = 1, 6 do
-        love.graphics.setColor(self.colors[i])
-        love.graphics.printf(self.letterTable[i][1], 0, VIRTUAL_HEIGHT / 2 + y,
-            VIRTUAL_WIDTH + self.letterTable[i][2], 'center')
-    end
-end
+            -- print MATCH 3 letters in their corresponding current colors
+            for i = 1, 6 do
+                love.graphics.setColor(self.colors[i])
+                love.graphics.printf(self.letterTable[i][1], 0, VIRTUAL_HEIGHT / 2 + y,
+                    VIRTUAL_WIDTH + self.letterTable[i][2], 'center')
+            end
+        end
 
 --[[
     Draws "Start" and "Quit Game" text over semi-transparent rectangles.

@@ -106,8 +106,25 @@ function PlayState:update(dt)
     end
 
     if self.canInput then
-        -- move cursor around based on bounds of grid, playing sounds
-        if love.keyboard.wasPressed('up') then
+        local highlightY = -1
+        local highlightX = -1
+        --handle mouse events
+        local mouseX, mouseY = push:toGame(love.mouse.getPosition())
+        --if we used the mouse...
+        if mouseX >= self.board.x and mouseX <= self.board.x+8*32
+           and mouseY >= self.board.y and mouseY <= self.board.y+8*32 then
+            highlightY = math.floor((mouseY-self.board.y)/32)
+            highlightX = math.floor((mouseX-self.board.x)/32)
+            
+            if highlightY ~= self.boardHighlightY then
+                self.boardHighlightY = highlightY
+                gSounds['select']:play()
+            elseif highlightX ~= self.boardHighlightX then
+                self.boardHighlightX = highlightX
+                gSounds['select']:play()
+            end
+        -- otherwise move cursor around based on bounds of grid, playing sounds
+        elseif love.keyboard.wasPressed('up') then
             self.boardHighlightY = math.max(0, self.boardHighlightY - 1)
             gSounds['select']:play()
         elseif love.keyboard.wasPressed('down') then
@@ -119,10 +136,10 @@ function PlayState:update(dt)
         elseif love.keyboard.wasPressed('right') then
             self.boardHighlightX = math.min(7, self.boardHighlightX + 1)
             gSounds['select']:play()
-        end
+        end    
 
-        -- if we've pressed enter, to select or deselect a tile...
-        if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
+        -- if we've pressed enter or mouse, to select or deselect a tile...
+        if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') or love.mouse.wasPressed(1) then
             
             -- if same tile as currently highlighted, deselect
             local x = self.boardHighlightX + 1

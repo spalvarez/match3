@@ -25,7 +25,7 @@ function Tile:init(x, y, color, variety)
 
     -- tile appearance/points
     self.color = color
-    self.variety = color
+    self.variety = variety
 end
 
 function Tile:render(x, y)

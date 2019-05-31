@@ -59,9 +59,11 @@ function PlayState:enter(params)
     
     -- grab level # from the params we're passed
     self.level = params.level
-
+    
+    self.variety = math.min(math.floor(self.level/VARIETY_MODIFIER + 1), 6)
+    print("Enter play state variety: " .. self.variety)
     -- spawn a board and place it toward the right
-    self.board = params.board or Board(VIRTUAL_WIDTH - 272, 16, self.level)
+    self.board = params.board or Board(VIRTUAL_WIDTH - 272, 16, math.random(self.variety))
 
     -- grab score from params if it was passed
     self.score = params.score or 0

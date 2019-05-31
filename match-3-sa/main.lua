@@ -44,6 +44,8 @@ VIRTUAL_HEIGHT = 288
 -- speed at which our background texture will scroll
 BACKGROUND_SCROLL_SPEED = 80
 
+VARIETY_MODIFIER = 3
+
 function love.load()
     
     -- window bar title

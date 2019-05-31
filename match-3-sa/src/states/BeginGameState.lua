@@ -29,7 +29,6 @@ function BeginGameState:enter(def)
     self.level = def.level
     
     local variety = math.min(math.floor(self.level/VARIETY_MODIFIER + 1), 6)
-    print("Begin game state variety: " .. variety)
     -- spawn a board and place it toward the right
     self.board = Board(VIRTUAL_WIDTH - 272, 16, self.level)
 

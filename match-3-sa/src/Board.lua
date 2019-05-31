@@ -34,7 +34,6 @@ function Board:initializeTiles()
             
             -- create a new tile at X,Y with a random color and base variety
             local variety = math.min(math.floor(self.level/VARIETY_MODIFIER + 1), 6)
-            print("Init tiles variety: " .. variety)
             table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(6), math.random(variety)))
         end
     end
@@ -236,7 +235,6 @@ function Board:getFallingTiles()
 
     -- create replacement tiles at the top of the screen
     local variety = math.min(math.floor(self.level/VARIETY_MODIFIER + 1), 6)
-    print("Replace tile variety: " .. variety)
     for x = 1, 8 do
         for y = 8, 1, -1 do
             local tile = self.tiles[y][x]

@@ -61,7 +61,6 @@ function PlayState:enter(params)
     self.level = params.level
     
     self.variety = math.min(math.floor(self.level/VARIETY_MODIFIER + 1), 6)
-    print("Enter play state variety: " .. self.variety)
     -- spawn a board and place it toward the right
     self.board = params.board or Board(VIRTUAL_WIDTH - 272, 16, math.random(self.variety))
 
@@ -214,7 +213,12 @@ function PlayState:calculateMatches()
 
         -- add score and 1 extra second to timer for each match
         for k, match in pairs(matches) do
-            self.score = self.score + #match * 50
+            local score = 0
+            for key, tile in pairs(match) do
+                score = score + 50 * tile.variety
+            end
+            print("Score for this match: " .. score)
+            self.score = self.score + score
             self.timer = self.timer + 1
         end
 

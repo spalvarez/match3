@@ -44,7 +44,7 @@ VIRTUAL_HEIGHT = 288
 -- speed at which our background texture will scroll
 BACKGROUND_SCROLL_SPEED = 80
 
-VARIETY_MODIFIER = 3
+VARIETY_MODIFIER = 1
 
 function love.load()
     
@@ -80,6 +80,9 @@ function love.load()
 
     -- initialize input table
     love.keyboard.keysPressed = {}
+    
+    --enable debugging
+    if arg[#arg] == "-debug" then require("mobdebug").start() end
 end
 
 function love.resize(w, h)
@@ -122,6 +125,8 @@ end
 
 function love.update(dt)
     
+    if debuggee then debuggee.poll() end 
+
     -- scroll background, used across all states
     backgroundX = backgroundX - BACKGROUND_SCROLL_SPEED * dt
     

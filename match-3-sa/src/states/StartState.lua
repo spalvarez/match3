@@ -55,7 +55,7 @@ function StartState:init()
 
     -- generate full table of tiles just for display
     for i = 1, 64 do
-        table.insert(positions, gFrames['tiles'][math.random(6)][selectVariety(6)])
+        table.insert(positions, gFrames['tiles'][math.random(6)][selectVariety(25)])
     end
 
     -- used to animate our full-screen transition rect

@@ -21,6 +21,9 @@ push = require 'lib/push'
 -- used for timers and tweening
 Timer = require 'lib/knife.timer'
 
+--use moonshine for graphic effects
+Moonshine = require 'lib/moonshine'
+
 --
 -- our own code
 --

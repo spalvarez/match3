@@ -31,10 +31,16 @@ function Board:initializeTiles()
         table.insert(self.tiles, {})
 
         for tileX = 1, 8 do
+          
+          local isBomb = false
+          --based on a 1 percent chance, make it a shiny block that can destroy a whole row
+            if math.random() >= 0.5 then
+              isBomb = true
+            end
             
             -- create a new tile at X,Y with a random color and base variety
             local variety = selectVariety(self.level)
-            table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(6), selectVariety(self.level)))
+            table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(6), selectVariety(self.level), isBomb))
         end
     end
 

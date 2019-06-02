@@ -13,7 +13,7 @@
 
 Tile = Class{}
 
-function Tile:init(x, y, color, variety)
+function Tile:init(x, y, color, variety, isBomb)
     
     -- board positions
     self.gridX = x
@@ -26,10 +26,14 @@ function Tile:init(x, y, color, variety)
     -- tile appearance/points
     self.color = color
     self.variety = variety
+    self.isBomb = isBomb
+    --we don't want an extra bonus for a bomb tile
+    if self.isBomb then
+      self.variety = 1
+    end
 end
 
 function Tile:render(x, y)
-    
     -- draw shadow
     love.graphics.setColor(34, 32, 52, 255)
     love.graphics.draw(gTextures['main'], gFrames['tiles'][self.color][self.variety],
@@ -37,6 +41,11 @@ function Tile:render(x, y)
 
     -- draw tile itself
     love.graphics.setColor(255, 255, 255, 255)
-    love.graphics.draw(gTextures['main'], gFrames['tiles'][self.color][self.variety],
+    if self.isBomb then
+      love.graphics.draw(gTextures['main'], gFrames['tiles'][self.color][7],
         self.x + x, self.y + y)
+    else
+      love.graphics.draw(gTextures['main'], gFrames['tiles'][self.color][self.variety],
+        self.x + x, self.y + y)
+    end
 end

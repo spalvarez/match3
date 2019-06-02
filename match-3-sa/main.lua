@@ -57,6 +57,11 @@ function love.load()
 
     -- seed the RNG
     math.randomseed(os.time())
+    
+    --initialize a glow effect
+    --effect = Moonshine(Moonshine.effects.glow).Moonshine(Moonshine.effects.crt)
+    --effect.glow.strength = .5
+    --effect.glow.min_luma = .1
 
     -- initialize our virtual resolution
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {

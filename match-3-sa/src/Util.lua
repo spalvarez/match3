@@ -44,6 +44,41 @@ function GenerateTileQuads(atlas)
 end
 
 --[[
+  We will select a tile variety using a weighted random number
+  taking into account level. higher varieties are only available at
+  level/VARIETY_MODIFIER > Variety#
+  There are 6 varieties, without level consideration the weights should be:
+  
+  Variety 1: 50%
+  Variety 2: 20%
+  Variety 3: 14%
+  Variety 4: 8%
+  Variety 5: 5%
+  Variety 6: 3%
+  
+  When level is taken into account, the chance for the missing varieties will be added to variety 1.
+--]]
+function selectVariety(level) 
+  local maxVariety = math.min(math.floor(level/VARIETY_MODIFIER + 1), 6)
+  local variety = 1
+  local randomNum = math.random()
+  if maxVariety >= 2 and randomNum < .5 and randomNum >= .3 then
+    variety = 2
+  elseif maxVariety >= 3 and randomNum < .3 and randomNum >= .16 then
+    variety = 3
+  elseif maxVariety >= 4 and randomNum < .16 and randomNum >= .08 then
+    variety = 4
+  elseif maxVariety >= 5 and randomNum < .08 and randomNum >= .03 then
+    variety = 5
+  elseif maxVariety >= 6 and randomNum < .03 then
+    variety = 6
+  end
+  
+  return variety
+end
+
+
+--[[
     Recursive table printing function.
     https://coronalabs.com/blog/2014/09/02/tutorial-printing-table-contents/
 ]]

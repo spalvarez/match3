@@ -55,7 +55,7 @@ function StartState:init()
 
     -- generate full table of tiles just for display
     for i = 1, 64 do
-        table.insert(positions, gFrames['tiles'][math.random(6)][1])
+        table.insert(positions, gFrames['tiles'][math.random(6)][selectVariety(6)])
     end
 
     -- used to animate our full-screen transition rect
@@ -63,6 +63,9 @@ function StartState:init()
 
     -- if we've selected an option, we need to pause input while we animate out
     self.pauseInput = false
+    
+    --set initial total score to 0
+    self.totalScore = 0
 end
 
 function StartState:update(dt)
@@ -90,7 +93,8 @@ function StartState:update(dt)
                         [self] = {transitionAlpha = 255}
                     }):finish(function()
                         gStateMachine:change('begin-game', {
-                            level = 1
+                            level = 1,
+                            totalScore = self.totalScore
                         })
 
                     -- remove color timer from Timer
@@ -136,7 +140,8 @@ function StartState:update(dt)
                     [self] = {transitionAlpha = 255}
                 }):finish(function()
                     gStateMachine:change('begin-game', {
-                        level = 1
+                        level = 1,
+                        totalScore = self.totalScore
                     })
 
                     -- remove color timer from Timer

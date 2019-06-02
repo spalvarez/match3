@@ -44,7 +44,11 @@ VIRTUAL_HEIGHT = 288
 -- speed at which our background texture will scroll
 BACKGROUND_SCROLL_SPEED = 80
 
-VARIETY_MODIFIER = 1
+--How often a new score modifier will be added
+VARIETY_MODIFIER = 3
+
+--Initial level time
+START_TIMER = 30
 
 function love.load()
     
@@ -116,7 +120,7 @@ function love.keyboard.wasPressed(key)
 end
 
 function love.mouse.wasPressed(button)
-    if love.mouse.buttonsPressed[button] then
+    if love.mouse.buttonsPressed and love.mouse.buttonsPressed[button] then
         return true
     else
         return false

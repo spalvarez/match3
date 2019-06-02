@@ -27,8 +27,9 @@ function BeginGameState:enter(def)
     
     -- grab level # from the def we're passed
     self.level = def.level
+    --grab totalScore from what is passed
+    self.totalScore = def.totalScore
     
-    local variety = math.min(math.floor(self.level/VARIETY_MODIFIER + 1), 6)
     -- spawn a board and place it toward the right
     self.board = Board(VIRTUAL_WIDTH - 272, 16, self.level)
 
@@ -62,7 +63,8 @@ function BeginGameState:enter(def)
                 :finish(function()
                     gStateMachine:change('play', {
                         level = self.level,
-                        board = self.board
+                        board = self.board,
+                        totalScore = self.totalScore
                     })
                 end)
             end)

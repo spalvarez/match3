@@ -35,9 +35,12 @@ function PlayState:init()
 
     -- tile we're currently highlighting (preparing to swap)
     self.highlightedTile = nil
+    
+    --Empty Table for showing match scores
+    self.scores = {}
 
     self.score = 0
-    self.timer = 60
+    self.timer = START_TIMER
 
     -- set our Timer class to turn cursor highlight on and off
     Timer.every(0.5, function()
@@ -60,15 +63,17 @@ function PlayState:enter(params)
     -- grab level # from the params we're passed
     self.level = params.level
     
-    self.variety = math.min(math.floor(self.level/VARIETY_MODIFIER + 1), 6)
     -- spawn a board and place it toward the right
-    self.board = params.board or Board(VIRTUAL_WIDTH - 272, 16, math.random(self.variety))
+    self.board = params.board or Board(VIRTUAL_WIDTH - 272, 16, self.level)
 
     -- grab score from params if it was passed
     self.score = params.score or 0
 
     -- score we have to reach to get to the next level
     self.scoreGoal = self.level * 1.25 * 1000
+    
+    --Get total score from whart is passed
+    self.totalScore =  params.totalScore
 end
 
 function PlayState:update(dt)
@@ -85,7 +90,8 @@ function PlayState:update(dt)
         gSounds['game-over']:play()
 
         gStateMachine:change('game-over', {
-            score = self.score
+            score = self.totalScore,
+            
         })
     end
 
@@ -102,7 +108,8 @@ function PlayState:update(dt)
         -- change to begin game state with new level (incremented)
         gStateMachine:change('begin-game', {
             level = self.level + 1,
-            score = self.score
+            score = self.score,
+            totalScore = self.totalScore
         })
     end
 
@@ -217,10 +224,34 @@ function PlayState:calculateMatches()
             for key, tile in pairs(match) do
                 score = score + 50 * tile.variety
             end
-            print("Score for this match: " .. score)
+            
+            --We want to fade out the score
+            local scoreDisplay = { 
+              scorenum = score, 
+              x = match[2].gridX,
+              y = match[2].gridY,
+              opacity = 255,
+            }
+            
+            --Now Tween the score upwards from the center of the match made
+            Timer.tween(.5, {
+              [scoreDisplay] = { y = scoreDisplay.y - 1 },
+            }):finish(function()
+                --Then after a second fade out
+                Timer.after(1, function()
+                    Timer.tween(.25, {
+                      [scoreDisplay] = { opacity = 0 },
+                    })
+                  end)
+                end)
+            
+            table.insert(self.scores, scoreDisplay)
             self.score = self.score + score
+            self.totalScore = self.totalScore + score
             self.timer = self.timer + 1
         end
+        
+       
 
         -- remove any tiles that matched from the board, making empty spaces
         self.board:removeMatches()
@@ -246,6 +277,13 @@ end
 function PlayState:render()
     -- render board of tiles
     self.board:render()
+    
+    -- draw scores
+    for key, score in pairs(self.scores) do
+      love.graphics.setColor(255, 255, 0, score.opacity)
+      love.graphics.setFont(gFonts['medium'])
+      love.graphics.printf(score.scorenum, score.x * 32 + (VIRTUAL_WIDTH - 304), score.y * 32 + 16, 50, 'left')
+    end
 
     -- render highlighted tile if it exists
     if self.highlightedTile then
@@ -272,15 +310,17 @@ function PlayState:render()
     love.graphics.setLineWidth(4)
     love.graphics.rectangle('line', self.boardHighlightX * 32 + (VIRTUAL_WIDTH - 272),
         self.boardHighlightY * 32 + 16, 32, 32, 4)
-
+    
     -- GUI text
     love.graphics.setColor(56, 56, 56, 234)
-    love.graphics.rectangle('fill', 16, 16, 186, 116, 4)
+    love.graphics.rectangle('fill', 16, 16, 186, 190, 4)
 
     love.graphics.setColor(99, 155, 255, 255)
     love.graphics.setFont(gFonts['medium'])
     love.graphics.printf('Level: ' .. tostring(self.level), 20, 24, 182, 'center')
     love.graphics.printf('Score: ' .. tostring(self.score), 20, 52, 182, 'center')
     love.graphics.printf('Goal : ' .. tostring(self.scoreGoal), 20, 80, 182, 'center')
-    love.graphics.printf('Timer: ' .. tostring(self.timer), 20, 108, 182, 'center')
+    love.graphics.printf('Total Score: ' .. tostring(self.totalScore), 20, 108, 182, 'center')
+    love.graphics.printf('Timer: ' .. tostring(self.timer), 20, 140, 182, 'center')
+    
 end

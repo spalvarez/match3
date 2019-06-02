@@ -34,7 +34,7 @@ function Board:initializeTiles()
           
           local isBomb = false
           --based on a 1 percent chance, make it a shiny block that can destroy a whole row
-            if math.random() >= 0.5 then
+            if math.random() <= BOMB_CHANCE then
               isBomb = true
             end
             
@@ -82,17 +82,27 @@ function Board:calculateMatches()
 
                 -- if we have a match of 3 or more up to now, add it to our matches table
                 if matchNum >= 3 then
-                    local match = {}
-
-                    -- go backwards from here by matchNum
-                    for x2 = x - 1, x - matchNum, -1 do
-                        
-                        -- add each tile to the match that's in that match
-                        table.insert(match, self.tiles[y][x2])
+                  local match = {}
+                  
+                  -- go backwards from here by matchNum
+                  for x2 = x - 1, x - matchNum, -1 do
+                    --if its a bomb, just create a new match table with 
+                    --the whole row and break out of the loop
+                    if self.tiles[y][x2].isBomb then
+                      match = {}
+                      for key, tile in pairs(self.tiles[y]) do
+                        table.insert(match, tile)
+                      end
+                      --set x to 9 so we break out of the outer loop
+                      x=9
+                      break
+                    else
+                      -- add each tile to the match that's in that match
+                      table.insert(match, self.tiles[y][x2])
                     end
-
-                    -- add this match to our total matches table
-                    table.insert(matches, match)
+                  end
+                  -- add this match to our total matches table
+                  table.insert(matches, match)
                 end
 
                 matchNum = 1
@@ -106,14 +116,22 @@ function Board:calculateMatches()
 
         -- account for the last row ending with a match
         if matchNum >= 3 then
-            local match = {}
-            
-            -- go backwards from end of last row by matchNum
-            for x = 8, 8 - matchNum + 1, -1 do
-                table.insert(match, self.tiles[y][x])
+          local match = {}
+          
+          -- go backwards from end of last row by matchNum
+          for x = 8, 8 - matchNum + 1, -1 do
+            if self.tiles[y][x].isBomb then
+              match = {}
+              for key, tile in pairs(self.tiles[y]) do
+                table.insert(match, tile)
+              end
+              break
+            else
+              table.insert(match, self.tiles[y][x])
             end
+          end
 
-            table.insert(matches, match)
+          table.insert(matches, match)
         end
     end
 
@@ -128,24 +146,36 @@ function Board:calculateMatches()
             if self.tiles[y][x].color == colorToMatch then
                 matchNum = matchNum + 1
             else
-                colorToMatch = self.tiles[y][x].color
+              colorToMatch = self.tiles[y][x].color
 
-                if matchNum >= 3 then
-                    local match = {}
+              if matchNum >= 3 then
+                  local match = {}
 
-                    for y2 = y - 1, y - matchNum, -1 do
-                        table.insert(match, self.tiles[y2][x])
+                  for y2 = y - 1, y - matchNum, -1 do
+                    --if its a bomb, just create a new match table with 
+                    --the whole column and break out of the loop
+                    if self.tiles[y2][x].isBomb then
+                      match = {}
+                      for y3=1, 8 do
+                        table.insert(match, self.tiles[y3][x])
+                      end
+                      --set y=9 to ensure we brealk out of the outer loop
+                      y=9
+                      break
+                    else
+                      table.insert(match, self.tiles[y2][x])
                     end
+                  end
+                  
+                  table.insert(matches, match)
+              end
 
-                    table.insert(matches, match)
-                end
+              matchNum = 1
 
-                matchNum = 1
-
-                -- don't need to check last two if they won't be in a match
-                if y >= 7 then
-                    break
-                end
+              -- don't need to check last two if they won't be in a match
+              if y >= 7 then
+                  break
+              end
             end
         end
 
@@ -155,7 +185,17 @@ function Board:calculateMatches()
             
             -- go backwards from end of last row by matchNum
             for y = 8, 8 - matchNum + 1, -1 do
+              --if its a bomb, just create a new match table with 
+              --the whole column and break out of the loop
+              if self.tiles[y][x].isBomb then
+                match = {}
+                for y2=1, 8 do
+                  table.insert(match, self.tiles[y2][x])
+                end
+                break
+              else
                 table.insert(match, self.tiles[y][x])
+              end
             end
 
             table.insert(matches, match)
@@ -246,9 +286,13 @@ function Board:getFallingTiles()
 
             -- if the tile is nil, we need to add a new one
             if not tile then
-
+                local isBomb = false
                 -- new tile with random color and variety
-                local tile = Tile(x, y, math.random(6), selectVariety(self.level))
+                if math.random() <= BOMB_CHANCE then
+                  isBomb = true
+                end
+                
+                local tile = Tile(x, y, math.random(6), selectVariety(self.level), isBomb)
                 tile.y = -32
                 self.tiles[y][x] = tile
 

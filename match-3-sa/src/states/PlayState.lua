@@ -228,8 +228,8 @@ function PlayState:calculateMatches()
             --We want to fade out the score
             local scoreDisplay = { 
               scorenum = score, 
-              x = match[2].gridX,
-              y = match[2].gridY,
+              x = match[math.floor(#match/2)].gridX,
+              y = match[math.floor(#match/2)].gridY,
               opacity = 255,
             }
             

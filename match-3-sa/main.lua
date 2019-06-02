@@ -47,6 +47,9 @@ BACKGROUND_SCROLL_SPEED = 80
 --How often a new score modifier will be added
 VARIETY_MODIFIER = 3
 
+--Chance we'll get a bomb
+BOMB_CHANCE = 0.01
+
 --Initial level time
 START_TIMER = 30
 

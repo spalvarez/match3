@@ -185,6 +185,7 @@ function PlayState:update(dt)
 
                 self.board.tiles[newTile.gridY][newTile.gridX] = newTile
 
+                local swappedTile = self.highlightedTile
                 -- tween coordinates between the two so they swap
                 Timer.tween(0.1, {
                     [self.highlightedTile] = {x = newTile.x, y = newTile.y},
@@ -193,7 +194,30 @@ function PlayState:update(dt)
                 
                 -- once the swap is finished, we can tween falling blocks as needed
                 :finish(function()
-                    self:calculateMatches()
+                    if not self:calculateMatches() then
+                      --If there were no matches, we need to swap back
+                      local oldX = swappedTile.gridX
+                      local oldY = swappedTile.gridY
+                      
+                      swappedTile.gridX = newTile.gridX
+                      swappedTile.gridY = newTile.gridY
+                      newTile.gridX = oldX
+                      newTile.gridY = oldY
+                      
+                      --swap the tiles back in the tiles table
+                      self.board.tiles[swappedTile.gridY][swappedTile.gridX] =
+                        swappedTile
+
+                      self.board.tiles[newTile.gridY][newTile.gridX] = newTile
+                      
+                      gSounds['error']:play()
+                      
+                       -- tween coordinates between the two so they swap
+                      Timer.tween(0.1, {
+                          [swappedTile] = {x = newTile.x, y = newTile.y},
+                          [newTile] = {x = swappedTile.x, y = swappedTile.y}
+                      })
+                    end
                 end)
             end
         end
@@ -267,10 +291,11 @@ function PlayState:calculateMatches()
             -- as a result of falling blocks once new blocks have finished falling
             self:calculateMatches()
         end)
-    
+        return true
     -- if no matches, we can continue playing
     else
         self.canInput = true
+        return false
     end
 end
 
